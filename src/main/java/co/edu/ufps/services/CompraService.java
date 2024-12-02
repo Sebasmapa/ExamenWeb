@@ -55,28 +55,28 @@ public class CompraService {
         // Obtener la tienda utilizando el UUID como String
         Optional<Tienda> optionalTienda = tiendaRepository.findByUuid(tiendaUuid);
         if (optionalTienda.isEmpty()) {
-            return null;  // O alguna acción alternativa si no se encuentra la tienda
+            return null; 
         }
         Tienda tienda = optionalTienda.get();
 
      // Obtener el cliente de manera condicional
         Cliente cliente = clienteRepository.findByDocumento(compraDTO.getCliente().getDocumento());
         if (cliente == null) {
-            return null;  // O alguna acción alternativa si no se encuentra el cliente
+            return null; 
         }
       
 
         // Obtener el vendedor de manera condicional
         Optional<Vendedor> optionalVendedor = vendedorRepository.findByDocumento(compraDTO.getVendedor().getDocumento());
         if (optionalVendedor.isEmpty()) {
-            return null;  // O alguna acción alternativa si no se encuentra el vendedor
+            return null;  
         }
         Vendedor vendedor = optionalVendedor.get();
 
         // Obtener el cajero de manera condicional
         Optional<Cajero> optionalCajero = cajeroRepository.findByToken(compraDTO.getCajero().getToken());
         if (optionalCajero.isEmpty()) {
-            return null;  // O alguna acción alternativa si no se encuentra el cajero
+            return null; 
         }
         Cajero cajero = optionalCajero.get();
 
@@ -85,7 +85,7 @@ public class CompraService {
         compra.setCliente(cliente);
         compra.setVendedor(vendedor);
         compra.setCajero(cajero);
-        compra.setTienda(tienda);  // Asociamos la tienda a la compra
+        compra.setTienda(tienda);  // Asociar la tienda a la compra
         compra.setFecha(java.time.LocalDate.now());
         compra.setImpuestos(compraDTO.getImpuesto());
 
@@ -94,7 +94,7 @@ public class CompraService {
         for (ProductoDTO productoDTO : compraDTO.getProductos()) {
             Producto producto = productoRepository.findByReferencia(productoDTO.getReferencia());
             if (producto == null) {
-                return null;  // O alguna acción alternativa si el producto no existe
+                return null;  
             }
 
             // Crear detalle de compra

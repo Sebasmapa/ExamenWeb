@@ -30,7 +30,7 @@ public class CompraController {
         Compra compra = compraService.registrarCompra(tiendaId, compraDTO);
         
         if (compra == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);  // o una respuesta más adecuada
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); 
         }
         
         return new ResponseEntity<>(compra, HttpStatus.CREATED);
