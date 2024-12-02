@@ -40,4 +40,29 @@ public class Compra {
 
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
     private List<Pago> pagos;
+
+    @Column(name = "impuestos", nullable = false)
+    private double impuestos;
+
+    @Column(name = "total", nullable = false)
+    private double total;
+
+    // Métodos adicionales
+
+    public double getImpuestos() {
+        return impuestos;
+    }
+
+    public void setImpuestos(double impuestos) {
+        this.impuestos = impuestos;
+    }
+
+    public double calcularTotalCompra() {
+        double totalCompra = 0.0;
+        for (DetallesCompra detalle : detallesCompra) {
+            totalCompra += detalle.getValorTotal();
+        }
+        totalCompra += impuestos;
+        return totalCompra;
+    }
 }

@@ -26,6 +26,10 @@ public class Producto {
     @Column(name = "precio", nullable = false)
     private Double precio;
 
+    public double getPrecio() {
+        return precio;
+    }
+    
     @Column(name = "cantidad", nullable = false)
     private Integer cantidad;
 

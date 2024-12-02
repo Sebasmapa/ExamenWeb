@@ -2,6 +2,8 @@ package co.edu.ufps.entities;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -33,5 +35,6 @@ public class Cajero {
     private Tienda tienda;
 
     @OneToMany(mappedBy = "cajero", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Compra> compras;
 }
