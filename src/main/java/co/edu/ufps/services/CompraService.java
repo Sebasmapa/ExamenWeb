@@ -1,6 +1,5 @@
 package co.edu.ufps.services;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,7 @@ import co.edu.ufps.repositories.DetallesCompraRepository;
 import co.edu.ufps.repositories.ProductoRepository;
 import co.edu.ufps.repositories.TiendaRepository;
 import co.edu.ufps.repositories.VendedorRepository;
+import jakarta.transaction.Transactional;
 
 
 @Service
@@ -47,77 +47,93 @@ public class CompraService {
 
     @Autowired
     private TiendaRepository tiendaRepository;
+    
+    @Autowired
+    private ClienteService clienteService;
 
-    public Compra registrarCompra(UUID tiendaId, CompraDTO compraDTO) {
-        // Convertir el UUID de la tienda a String antes de hacer la búsqueda
-        String tiendaUuid = tiendaId.toString();
+    @Transactional
+    public Compra procesarCompra(UUID tiendaId, CompraDTO compraDTO) {
+        // Buscar tienda por UUID
+        Tienda tienda = tiendaRepository.findByUuid(tiendaId.toString())
+                .orElseThrow(() -> new IllegalArgumentException("Tienda no encontrada con UUID: " + tiendaId));
 
-        // Obtener la tienda utilizando el UUID como String
-        Optional<Tienda> optionalTienda = tiendaRepository.findByUuid(tiendaUuid);
-        if (optionalTienda.isEmpty()) {
-            return null; 
-        }
-        Tienda tienda = optionalTienda.get();
+        String doc = compraDTO.getCliente().getDocumento();
+        String tipoDoc = compraDTO.getCliente().getTipoDocumento();
 
-     // Obtener el cliente de manera condicional
-        Cliente cliente = clienteRepository.findByDocumento(compraDTO.getCliente().getDocumento());
-        if (cliente == null) {
-            return null; 
-        }
-      
-
-        // Obtener el vendedor de manera condicional
-        Optional<Vendedor> optionalVendedor = vendedorRepository.findByDocumento(compraDTO.getVendedor().getDocumento());
-        if (optionalVendedor.isEmpty()) {
-            return null;  
-        }
-        Vendedor vendedor = optionalVendedor.get();
-
-        // Obtener el cajero de manera condicional
-        Optional<Cajero> optionalCajero = cajeroRepository.findByToken(compraDTO.getCajero().getToken());
-        if (optionalCajero.isEmpty()) {
-            return null; 
-        }
-        Cajero cajero = optionalCajero.get();
-
-        // Crear nueva compra
+     // Inicializar compra
         Compra compra = new Compra();
-        compra.setCliente(cliente);
-        compra.setVendedor(vendedor);
-        compra.setCajero(cajero);
-        compra.setTienda(tienda);  // Asociar la tienda a la compra
+        compra.setTienda(tienda);
         compra.setFecha(java.time.LocalDate.now());
-        compra.setImpuestos(compraDTO.getImpuesto());
+        
+     // Manejo del cliente
+        Cliente cliente = clienteService.buscarOCrearCliente(
+                compraDTO.getCliente().getDocumento(),
+                compraDTO.getCliente().getTipoDocumento(),
+                compraDTO.getCliente()
+        );
+        compra.setCliente(cliente);
+        
+        // Validar y obtener vendedor
+        Vendedor vendedor = vendedorRepository.findByDocumento(compraDTO.getVendedor().getDocumento())
+                .orElseThrow(() -> new IllegalArgumentException("Vendedor no encontrado con documento: " + compraDTO.getVendedor().getDocumento()));
 
-        // Calcular el total de la compra y los detalles
-        double totalCompra = 0.0;
+        compra.setVendedor(vendedor);
+
+        
+        // Validar y obtener cajero
+        Cajero cajero = cajeroRepository.findByToken(compraDTO.getCajero().getToken())
+                .orElseThrow(() -> new IllegalArgumentException("Cajero no encontrado con token: " + compraDTO.getCajero().getToken()));
+
+        compra.setCajero(cajero);
+
+
+        // Procesar productos y calcular el total
+        double total = procesarProductos(compraDTO, compra);
+
+        // Calcular impuestos
+        double impuestos = total * (compraDTO.getImpuesto() / 100.0);
+        compra.setImpuestos(impuestos);
+
+        // Actualizar el total
+        compra.setTotal(total + impuestos);
+
+        // Guardar la compra
+        return compraRepository.save(compra);
+    }
+    
+
+    private double procesarProductos(CompraDTO compraDTO, Compra compra) {
+        double total = 0.0;
+
         for (ProductoDTO productoDTO : compraDTO.getProductos()) {
             Producto producto = productoRepository.findByReferencia(productoDTO.getReferencia());
             if (producto == null) {
-                return null;  
+                throw new IllegalArgumentException("Producto no encontrado con referencia: " + productoDTO.getReferencia());
+            }
+
+            // Validar cantidades
+            if (productoDTO.getCantidad() > producto.getCantidad()) {
+                throw new IllegalArgumentException("Cantidad solicitada supera el inventario disponible para el producto: " + productoDTO.getReferencia());
             }
 
             // Crear detalle de compra
+            double precioFinal = producto.getPrecio() * (1 - productoDTO.getDescuento() / 100.0);
+            double subtotal = precioFinal * productoDTO.getCantidad();
+            total += subtotal;
+
             DetallesCompra detalle = new DetallesCompra();
+            detalle.setCompra(compra);
             detalle.setProducto(producto);
             detalle.setCantidad(productoDTO.getCantidad());
-            detalle.setPrecio(producto.getPrecio());
+            detalle.setPrecio(precioFinal);
             detalle.setDescuento(productoDTO.getDescuento());
-
-            // Calcular y asignar el valor total del detalle
-            detalle.setValorTotalFromCalculation();
-            totalCompra += detalle.getValorTotal();
-
-            detalle.setCompra(compra);
             detallesCompraRepository.save(detalle);
+
+            // Actualizar inventario del producto
+            producto.setCantidad(producto.getCantidad() - productoDTO.getCantidad());
+            productoRepository.save(producto);
         }
 
-        // Establecemos el total de la compra
-        compra.setTotal(totalCompra);
-
-        // Guardamos la compra
-        compraRepository.save(compra);
-
-        return compra;
+        return total;
     }
 }

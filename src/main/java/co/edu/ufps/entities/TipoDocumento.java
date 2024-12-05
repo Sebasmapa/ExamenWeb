@@ -15,7 +15,7 @@ public class TipoDocumento {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "nombre", nullable = false)
+    @Column(name = "nombre")
     private String nombre;
 
     @OneToMany(mappedBy = "tipoDocumento", cascade = CascadeType.ALL)

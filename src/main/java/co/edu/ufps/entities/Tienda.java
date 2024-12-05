@@ -2,6 +2,8 @@ package co.edu.ufps.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -23,6 +25,17 @@ public class Tienda {
     @Column(name = "uuid")
     private String uuid;
 
-    @OneToMany(mappedBy = "tienda", cascade = CascadeType.ALL)
-    private List<Compra> compras;
+    @OneToMany(mappedBy = "tienda", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Compra> compras = new ArrayList<>();
+
+    public void addCompra(Compra compra) {
+        compras.add(compra);
+        compra.setTienda(this);
+    }
+
+    public void removeCompra(Compra compra) {
+        compras.remove(compra);
+        compra.setTienda(null);
+    }
 }
+

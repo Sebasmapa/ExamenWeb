@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CajeroRepository extends JpaRepository<Cajero, Integer> {
 
-    Optional<Cajero> findByToken(String token);  // Asegúrate de que sea String
+    Optional<Cajero> findByToken(String token);  
 }
 

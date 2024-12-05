@@ -1,5 +1,6 @@
 package co.edu.ufps.controllers;
 
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,16 +24,27 @@ public class CompraController {
     private CompraService compraService;
 
     @PostMapping("/{tiendaId}")
-    public ResponseEntity<Compra> registrarCompra(
-            @PathVariable UUID tiendaId, 
+    public ResponseEntity<?> registrarCompra(
+            @PathVariable UUID tiendaId,
             @RequestBody CompraDTO compraDTO) {
-        
-        Compra compra = compraService.registrarCompra(tiendaId, compraDTO);
-        
-        if (compra == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); 
+        try {
+            // Procesar la compra utilizando el service2
+            Compra compra = compraService.procesarCompra(tiendaId, compraDTO);
+
+            // Crear respuesta exitosa
+            return ResponseEntity.status(HttpStatus.CREATED).body(compra);
+
+        } catch (IllegalArgumentException e) {
+            // Manejar errores de validación y negocio
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    Map.of("status", "error", "message", e.getMessage())
+            );
+
+        } catch (Exception e) {
+            // Manejar cualquier otro error inesperado
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Map.of("status", "error", "message", "Error inesperado: " + e.getMessage())
+            );
         }
-        
-        return new ResponseEntity<>(compra, HttpStatus.CREATED);
     }
 }

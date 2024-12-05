@@ -25,7 +25,7 @@ public class Cliente {
     private String documento;
 
     @ManyToOne
-    @JoinColumn(name = "tipo_documento_id", nullable = false)
+    @JoinColumn(name = "tipo_documento_id")
     private TipoDocumento tipoDocumento;
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)

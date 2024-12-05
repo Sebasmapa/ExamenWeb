@@ -1,12 +1,18 @@
 package co.edu.ufps.DTOs;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Data;
 
 @Data
 public class MedioPagoDTO {
 
-    private String tipo_pago;
-    private String tipo_tarjeta;
-    private int cuotas;
+	@JsonProperty("tipo_pago")
+    private String tipoPago;
+
+    @JsonProperty("tipo_tarjeta")
+    private String tipoTarjeta;
+
+    private Integer cuotas;
     private double valor;
 }
