@@ -8,9 +8,8 @@ import lombok.Data;
 
 @Data
 public class CompraDTO {
-	private double impuesto;
+    private double impuesto;
 
-    @JsonProperty("cliente")
     private ClienteDTO cliente;
 
     @JsonProperty("productos")
@@ -19,22 +18,10 @@ public class CompraDTO {
     @JsonProperty("medios_pago")
     private List<MedioPagoDTO> mediosPago;
 
-    @JsonProperty("vendedorDocumento")
-    private String vendedorDocumento;
+    @JsonProperty("vendedor")
+    private VendedorDTO vendedor;
 
-    @JsonProperty("cajeroToken")
-    private String cajeroToken;
-    
-    public VendedorDTO getVendedor() {
-        VendedorDTO vendedor = new VendedorDTO();
-        vendedor.setDocumento(vendedorDocumento);
-        return vendedor;
-    }
-
-    public CajeroDTO getCajero() {
-        CajeroDTO cajero = new CajeroDTO();
-        cajero.setToken(cajeroToken);
-        return cajero;
-    }
+    @JsonProperty("cajero")
+    private CajeroDTO cajero;
 }
 

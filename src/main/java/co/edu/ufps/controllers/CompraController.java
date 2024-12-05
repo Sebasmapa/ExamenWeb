@@ -1,7 +1,6 @@
 package co.edu.ufps.controllers;
 
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,13 +22,13 @@ public class CompraController {
     @Autowired
     private CompraService compraService;
 
-    @PostMapping("/{tiendaId}")
+    @PostMapping("/{tiendaUuid}")
     public ResponseEntity<?> registrarCompra(
-            @PathVariable UUID tiendaId,
+            @PathVariable String tiendaUuid,
             @RequestBody CompraDTO compraDTO) {
         try {
             // Procesar la compra utilizando el service2
-            Compra compra = compraService.procesarCompra(tiendaId, compraDTO);
+            Compra compra = compraService.procesarCompra(tiendaUuid, compraDTO);
 
             // Crear respuesta exitosa
             return ResponseEntity.status(HttpStatus.CREATED).body(compra);

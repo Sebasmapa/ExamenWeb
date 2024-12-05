@@ -14,14 +14,14 @@ public class ClienteService {
     @Autowired
     private ClienteRepository clienteRepository;
 
-    public Cliente buscarOCrearCliente(String documento, String tipoDocumento, ClienteDTO clienteRequest) {
-        return clienteRepository.findByDocumentoAndTipoDocumento_Nombre(documento, tipoDocumento)
+    public Cliente buscarOCrearCliente(String documento, String tipo_documento, ClienteDTO clienteRequest) {
+        return clienteRepository.findByDocumentoAndTipoDocumento_Nombre(documento, tipo_documento)
                 .orElseGet(() -> {
                     Cliente nuevoCliente = new Cliente();
                     nuevoCliente.setDocumento(documento);
                     nuevoCliente.setNombre(clienteRequest.getNombre());
                     TipoDocumento tipoDoc = new TipoDocumento();
-                    tipoDoc.setNombre(tipoDocumento);
+                    tipoDoc.setNombre(tipo_documento);
                     nuevoCliente.setTipoDocumento(tipoDoc);
 
                     return clienteRepository.save(nuevoCliente);
