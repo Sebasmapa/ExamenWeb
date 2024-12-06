@@ -47,8 +47,8 @@ public class CompraService {
 
     @Transactional
     public Compra procesarCompra(String tiendaUuid, CompraDTO compraDTO) {
-    	System.out.println("cliente"+ compraDTO.getCliente());
-        // Validar datos básicos del cliente
+       
+    	// Validar datos básicos del cliente
         if (compraDTO.getCliente() == null) {
             throw new IllegalArgumentException("El campo 'cliente' no puede ser nulo.");
         }
@@ -68,7 +68,7 @@ public class CompraService {
         compra.setTienda(tienda);
         compra.setFecha(java.time.LocalDate.now());
 
-        // Manejo del cliente: buscar o crears
+        // Manejo del cliente: buscar o crear
         Cliente cliente = clienteService.buscarOCrearCliente(
                 compraDTO.getCliente().getDocumento(),
                 compraDTO.getCliente().getTipoDocumento(),
@@ -86,6 +86,9 @@ public class CompraService {
                 .orElseThrow(() -> new IllegalArgumentException("Cajero no encontrado con token: " + compraDTO.getCajero().getToken()));
         compra.setCajero(cajero);
 
+        // Guardar la compra (ahora está persistida y tiene un ID)
+        compra = compraRepository.save(compra);  // Ahora se guarda primero la compra
+
         // Procesar productos y calcular el total
         double total = procesarProductos(compraDTO, compra);
 
@@ -96,9 +99,10 @@ public class CompraService {
         // Actualizar el total
         compra.setTotal(total + impuestos);
 
-        // Guardar la compra
-        return compraRepository.save(compra);
+        // Guardar la compra de nuevo con los detalles procesados
+        return compraRepository.save(compra);  // Persistir nuevamente para incluir impuestos y total
     }
+
 
     private double procesarProductos(CompraDTO compraDTO, Compra compra) {
         double total = 0.0;
@@ -119,12 +123,14 @@ public class CompraService {
             double subtotal = precioFinal * productoDTO.getCantidad();
             total += subtotal;
 
+            // Crear el detalle de la compra
             DetallesCompra detalle = new DetallesCompra();
             detalle.setCompra(compra);
             detalle.setProducto(producto);
             detalle.setCantidad(productoDTO.getCantidad());
             detalle.setPrecio(precioFinal);
             detalle.setDescuento(productoDTO.getDescuento());
+
             detallesCompraRepository.save(detalle);
 
             // Actualizar inventario del producto
@@ -134,4 +140,6 @@ public class CompraService {
 
         return total;
     }
+    
+    
 }

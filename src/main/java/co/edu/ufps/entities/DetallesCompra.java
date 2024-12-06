@@ -30,17 +30,9 @@ public class DetallesCompra {
     @Column(name = "descuento", nullable = false)
     private Double descuento;
 
-    @Column(name = "valor_total", nullable = false)
-    private Double valorTotal;
 
     // Método para calcular el valor total de la compra (sin persistir en base de datos)
-    @Transient
     public Double calcularValorTotal() {
         return (precio * cantidad) * (1 - descuento / 100);
-    }
-
-    // Método para establecer el valor total desde el cálculo
-    public void setValorTotalFromCalculation() {
-        this.valorTotal = calcularValorTotal();
     }
 }

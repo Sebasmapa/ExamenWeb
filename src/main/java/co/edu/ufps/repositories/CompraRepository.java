@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CompraRepository extends JpaRepository<Compra, Integer> {
-    // Métodos adicionales si son necesarios
+   
 }
 

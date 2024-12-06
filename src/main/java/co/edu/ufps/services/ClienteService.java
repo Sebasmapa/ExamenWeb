@@ -10,7 +10,6 @@ import co.edu.ufps.repositories.ClienteRepository;
 
 @Service
 public class ClienteService {
-
     @Autowired
     private ClienteRepository clienteRepository;
 
@@ -27,6 +26,4 @@ public class ClienteService {
                     return clienteRepository.save(nuevoCliente);
                 });
     }
-    
-
 }

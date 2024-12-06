@@ -9,5 +9,5 @@ import co.edu.ufps.entities.Cliente;
 
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
-    Optional<Cliente> findByDocumentoAndTipoDocumento_Nombre(String documento, String tipoDocumentoNombre);
+    Optional<Cliente> findByDocumentoAndTipoDocumento_Nombre(String documento, String tipoDocumento);
 }

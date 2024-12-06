@@ -57,12 +57,4 @@ public class Compra {
         this.impuestos = impuestos;
     }
 
-    public double calcularTotalCompra() {
-        double totalCompra = 0.0;
-        for (DetallesCompra detalle : detallesCompra) {
-            totalCompra += detalle.getValorTotal();
-        }
-        totalCompra += impuestos;
-        return totalCompra;
-    }
 }
