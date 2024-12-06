@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import co.edu.ufps.DTOs.CompraDTO;
+import co.edu.ufps.DTOs.CompraResponseDTO;
+import co.edu.ufps.entities.Compra;
 import co.edu.ufps.services.CompraService;
 
 @RestController
@@ -18,18 +20,22 @@ public class CompraController {
     private CompraService compraService;
 
     @PostMapping("/{tiendaUuid}")
-    public String crearCompra(@PathVariable String tiendaUuid, @RequestBody CompraDTO compraRequest) {
-        // Procesar la compra con el UUID de la tienda
-        CompraDTO compraDTO = new CompraDTO();
-        compraDTO.setCliente(compraRequest.getCliente());
-        compraDTO.setVendedor(compraRequest.getVendedor());
-        compraDTO.setCajero(compraRequest.getCajero());
-        compraDTO.setImpuesto(compraRequest.getImpuesto());
-        compraDTO.setProductos(compraRequest.getProductos());
+    public CompraResponseDTO crearCompra(@PathVariable String tiendaUuid, @RequestBody CompraDTO compraRequest) {
+        // Procesar la compra y obtener la entidad persistida
+        Compra compra = compraService.procesarCompra(tiendaUuid, compraRequest);
 
-        // Llamar al servicio para procesar la compra
-        compraService.procesarCompra(tiendaUuid, compraDTO);
+        // Construir la respuesta
+        CompraResponseDTO response = new CompraResponseDTO();
+        response.setStatus("success");
+        response.setMessage("La factura se ha creado correctamente con el número: " + compra.getId());
 
-        return "Compra creada exitosamente";
+        CompraResponseDTO.DataDTO data = new CompraResponseDTO.DataDTO();
+        data.setNumero(compra.getId().toString());
+        data.setTotal(String.valueOf(compra.getTotal()));
+        data.setFecha(compra.getFecha().toString());
+
+        response.setData(data);
+
+        return response;
     }
 }
